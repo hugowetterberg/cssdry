@@ -1,0 +1,23 @@
+<?php
+// $Id$
+
+function cssdry_stylesheet($path, $basepath=NULL) {
+  require_once('cssdry.inc');
+
+  if (empty($basepath)) {
+    $basepath = dirname($path);
+  }
+
+  if (file_exists($path)) {
+    $dir = file_directory_path() . '/cssdry';
+    $dry_file = $dir . '/' . md5(realpath($path)) . '.css';
+    if (!file_exists($dry_file) || filemtime($dry_file) < filemtime($path)) {
+      if (!file_exists($dir)) {
+        mkdir($dir);
+      }
+      $contents = file_get_contents($path);
+      file_put_contents($dry_file, _cssdry($contents, dirname($path)));
+    }
+    return $dry_file;
+  }
+}

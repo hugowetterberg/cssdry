@@ -1,0 +1,4 @@
+; $Id$
+name = CssDry
+description = Utility module that makes it possible to write DRY CSS
+core = 6.x
