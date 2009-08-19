@@ -60,7 +60,6 @@ class CSSProcessor {
 
   private function extractConstantsCallback(array $matches) {
     $constant = $matches[1];
-    error_log("Found {$constant}");
     $value = $matches[2];
     $this->constants[$constant] = $value;
     return '';
@@ -74,7 +73,6 @@ class CSSProcessor {
       $value = "/* Unknown constant {$constant_name} */";
     }
     else {
-      error_log("Replaced {$constant_name} with {$this->constants[$constant_name]}");
       $value = $this->constants[$constant_name];
     }
 
