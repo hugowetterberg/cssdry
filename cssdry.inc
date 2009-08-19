@@ -36,6 +36,7 @@ class CSSProcessor {
    */
   public function process() {
     $this->expandImports();
+    $this->applyBasePath();
     $this->expandConstants();
     $this->fixNesting();
     $this->minify();
@@ -100,8 +101,8 @@ class CSSProcessor {
     return file_get_contents($this->base_path.'/'.$filename);
   }
 
-  private function applyBasePath($rules) {
-    return preg_replace_callback('/url\(([^)]+)\)/', array($this, 'basePathCallback'), $rules);
+  private function applyBasePath() {
+    $this->content = preg_replace_callback('/url\(([^)]+)\)/', array($this, 'basePathCallback'), $this->content);
   }
 
   public function basePathCallback($match) {
@@ -127,8 +128,7 @@ class CSSProcessor {
       $piece = $pieces[$i];
       while (($closeBracketPos = strpos($piece, "}")) !== false) {
         if ($closeBracketPos > 0) {
-          $styles = substr($piece, 0, $closeBracketPos);;
-          $result[] = $this->applyBasePath($styles);
+          $result[] = substr($piece, 0, $closeBracketPos);;
         }
 
         $result[] = "}";
