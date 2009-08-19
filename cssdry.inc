@@ -46,12 +46,12 @@ class CSSProcessor {
 
   private function expandConstants() {
     $css = preg_replace_callback(
-      '/\[([^\]]+)=([^\]]+)\]/',
+      '/\$([a-z_-]+)+=([^;]+);?/',
       array($this, 'extractConstantsCallback'),
       $this->content);
 
     $css = preg_replace_callback(
-      '/\[([^\]]+)\]/',
+      '/\$([a-z_-]+)/',
       array($this, 'substituteConstantsCallback'),
       $css);
 
@@ -60,6 +60,7 @@ class CSSProcessor {
 
   private function extractConstantsCallback(array $matches) {
     $constant = $matches[1];
+    error_log("Found {$constant}");
     $value = $matches[2];
     $this->constants[$constant] = $value;
     return '';
@@ -68,10 +69,16 @@ class CSSProcessor {
   private function substituteConstantsCallback(array $matches) {
     $constant_name = $matches[1];
 
-    if (!isset($this->constants[$constant_name]))
-      throw new Exception("Reference to unknown CSS Constant: $constant_name");
+    $value = '';
+    if (!isset($this->constants[$constant_name])) {
+      $value = "/* Unknown constant {$constant_name} */";
+    }
+    else {
+      error_log("Replaced {$constant_name} with {$this->constants[$constant_name]}");
+      $value = $this->constants[$constant_name];
+    }
 
-    return $this->constants[$constant_name];
+    return $value;
   }
 
   private function expandImports($max_depth = 10) {
