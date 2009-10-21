@@ -1,5 +1,5 @@
 <?php
-// $Id$
+// $Id: cssdry.inc,v 1.1 2009/10/21 21:25:32 hugowetterberg Exp $
 
 /**
  * @file

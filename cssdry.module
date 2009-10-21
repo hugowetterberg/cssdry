@@ -1,5 +1,5 @@
 <?php
-// $Id$
+// $Id: cssdry.module,v 1.1 2009/10/21 21:25:32 hugowetterberg Exp $
 
 function cssdry_stylesheet($path, $basepath=NULL) {
   require_once('cssdry.inc');

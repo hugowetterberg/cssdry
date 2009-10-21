@@ -1,4 +1,4 @@
-; $Id$
+; $Id: cssdry.info,v 1.1 2009/10/21 21:25:32 hugowetterberg Exp $
 name = CssDry
 description = Utility module that makes it possible to write DRY CSS
 core = 6.x
