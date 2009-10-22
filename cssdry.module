@@ -8,15 +8,15 @@ function cssdry_stylesheet($path, $basepath=NULL) {
     $basepath = dirname($path);
   }
 
-  if (file_exists($path)) {    
+  if (file_exists($path)) {
     $dir = file_directory_path() . '/cssdry';
     $dry_file = $dir . '/' . md5(realpath($path)) . '.css';
     if (!file_exists($dry_file) || filemtime($dry_file) < filemtime($path)) {
       if (!file_exists($dir)) {
         mkdir($dir);
       }
-      $contents = file_get_contents($path);   
-      file_put_contents($dry_file, _cssdry($contents, dirname($path)));           
+      $contents = file_get_contents($path);
+      file_put_contents($dry_file, _cssdry($contents, dirname($path)));
     }
     return $dry_file;
   }
@@ -28,65 +28,65 @@ function cssdry_stylesheet($path, $basepath=NULL) {
  * Implements MODULE_preprocess_page().
  */
 function cssdry_preprocess_page(&$vars, $hook) {
-  global $language;      
-    
+  global $language;
+
   // Grab all the cssdry stylesheets.
   $stylesheets = _cssdry_fetch_theme_stylesheets($GLOBALS['theme']);
   if (empty($stylesheets)) {
     return;
-  }  
-  
+  }
+
   // Render the stylesheets to link elements.
-  $cssdry_styles = ''; 
-  
+  $cssdry_styles = '';
+
   $query_string = '?'. substr(variable_get('css_js_query_string', '0'), 1, 1);
   $base_path = base_path();
   $output = '';
-  foreach ($stylesheets AS $media => $files) {                             
+  foreach ($stylesheets AS $media => $files) {
     foreach ($files AS $file => $path) {
-      // Don't allow non-existent stylesheets to clutter the logs with 404.                           
+      // Don't allow non-existent stylesheets to clutter the logs with 404.
       $cssdry_path = cssdry_stylesheet("./$path/$file", $base_path);
-      if (!$cssdry_path) { 
+      if (!$cssdry_path) {
         continue;
       }
-      
+
       $cssdry_styles .= "<link type=\"text/css\" rel=\"stylesheet\" media=\"$media\" href=\"$base_path$cssdry_path$query_string\" />\n";
       if (!$language->direction == LANGUAGE_RTL) {
         continue;
       }
-      
-      $file_rtl = str_replace('.css', '-rtl.css', $file);                 
+
+      $file_rtl = str_replace('.css', '-rtl.css', $file);
       $cssdry_path_rtl = cssdry_stylesheet("./$path/$file_rtl", $base_path);
       if ($cssdry_path_rtl) {
         $output .= "<link type=\"text/css\" rel=\"stylesheet\" media=\"$media\" href=\"$base_path$cssdry_path_rtl$query_string\" />\n";
       }
     }
-  }  
-  
+  }
+
   // Append them to $styles and add a $cssdry_styles variable.
   $vars['styles'] .= $vars['cssdry_styles'] = $cssdry_styles;
 }
 
-function _cssdry_fetch_theme_stylesheets($name) {  
+function _cssdry_fetch_theme_stylesheets($name) {
   $paths = _cssdry_paths_to_basetheme($name);
 
-  $themes = list_themes();   
-  
+  $themes = list_themes();
+
   $stylesheets = array();
-  
+
   // Start with the base theme and travel up the chain to the active theme.
   foreach ($paths AS $theme_name => $path) {
     // Look at the conditional-stylesheets defined in the theme's .info file.
     if (!empty($themes[$theme_name]->info['cssdry'])) {
       foreach ($themes[$theme_name]->info['cssdry'] AS $media => $files) {
-        // Allow the theme to override its base themes' styles.            
+        // Allow the theme to override its base themes' styles.
         foreach ($files AS $file) {
           $stylesheets[$media][$file] = $path;
-        }            
+        }
       }
     }
   }
-  
+
   return $stylesheets;
 }
 
@@ -100,7 +100,7 @@ function _cssdry_fetch_theme_stylesheets($name) {
  */
 function _cssdry_paths_to_basetheme($theme) {
   static $theme_paths;
-  
+
   if (empty($theme_paths[$theme])) {
     $theme_paths[$theme] = array();
     $themes = list_themes();
@@ -110,6 +110,6 @@ function _cssdry_paths_to_basetheme($theme) {
     }
     $theme_paths[$theme][$theme] = dirname($themes[$theme]->filename);
   }
-  
+
   return $theme_paths[$theme];
 }
