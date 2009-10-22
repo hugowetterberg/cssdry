@@ -1,6 +1,16 @@
 <?php
 // $Id$
 
+/**
+ * Returns the path to a "dried out version" of the given css file.
+ *
+ * @param $path
+ *    Path to the css file to dry up.
+ * @param $basepath
+ *    Path from which imports will be relative to.
+ * @return 
+ *    new path to the dried out version of the provided css, or null if the source css file was not found.
+ */
 function cssdry_stylesheet($path, $basepath=NULL) {
   require_once('cssdry.inc');
 
@@ -67,6 +77,14 @@ function cssdry_preprocess_page(&$vars, $hook) {
   $vars['styles'] .= $vars['cssdry_styles'] = $cssdry_styles;
 }
 
+/**
+ * Returns an associative array from media type to an array of appropriate files.
+ *
+ * @param $name
+ *    The name of the theme.
+ * @return
+ *    An associative array mapping media types to an array of appropriate css files. 
+ */
 function _cssdry_fetch_theme_stylesheets($name) {
   $paths = _cssdry_paths_to_basetheme($name);
 
