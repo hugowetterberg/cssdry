@@ -106,7 +106,7 @@ function _cssdry_paths_to_basetheme($theme) {
     $themes = list_themes();
     // Grab the paths from the base theme.
     if (!empty($themes[$theme]->base_theme)) {
-      $theme_paths[$theme] = conditional_styles_paths_to_basetheme($themes[$theme]->base_theme);
+      $theme_paths[$theme] = _cssdry_paths_to_basetheme($themes[$theme]->base_theme);
     }
     $theme_paths[$theme][$theme] = dirname($themes[$theme]->filename);
   }
