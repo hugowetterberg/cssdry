@@ -25,13 +25,13 @@ function cssdry_stylesheet($path, $basepath=NULL) {
 
 
 /**
- * Implements MODULE_preprocess_page().
+ * Implements hook_preprocess_page().
  */
 function cssdry_preprocess_page(&$vars, $hook) {
-  global $language;
+  global $language, $theme;
 
   // Grab all the cssdry stylesheets.
-  $stylesheets = _cssdry_fetch_theme_stylesheets($GLOBALS['theme']);
+  $stylesheets = _cssdry_fetch_theme_stylesheets($theme);
   if (empty($stylesheets)) {
     return;
   }
