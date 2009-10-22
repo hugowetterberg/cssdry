@@ -1,0 +1,22 @@
+<?php
+// $Id
+
+/**
+ * @file
+ * Provides install, upgrade and un-install functions for cssdry.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function cssdry_uninstall() {
+  // Delete conditional stylesheets variables.
+  $themes = list_themes();
+  
+  foreach (array_keys($themes) AS $theme) {
+    variable_del('cssdry_' . $theme);
+  }
+  
+  // Clear the page cache.
+  cache_clear_all();
+}

@@ -8,16 +8,56 @@ function cssdry_stylesheet($path, $basepath=NULL) {
     $basepath = dirname($path);
   }
 
-  if (file_exists($path)) {
+  if (file_exists($path)) {    
     $dir = file_directory_path() . '/cssdry';
     $dry_file = $dir . '/' . md5(realpath($path)) . '.css';
-    if (!file_exists($dry_file) || filemtime($dry_file) < filemtime($path)) {
+    //if (!file_exists($dry_file) || filemtime($dry_file) < filemtime($path)) {
       if (!file_exists($dir)) {
         mkdir($dir);
       }
-      $contents = file_get_contents($path);
-      file_put_contents($dry_file, _cssdry($contents, dirname($path)));
-    }
+      $contents = file_get_contents($path);   
+      file_put_contents($dry_file, _cssdry($contents, dirname($path)));           
+    //}
     return $dry_file;
   }
+}
+
+/**
+ * Return paths for the theme and its base themes.
+ *
+ * @param $theme
+ *   The name of the theme.
+ * @return
+ *   An array of all the theme paths.
+ */
+function cssdry_paths_to_basetheme($theme) {
+  static $theme_paths;
+  
+  if (empty($theme_paths[$theme])) {
+    $theme_paths[$theme] = array();
+    $themes = list_themes();
+    // Grab the paths from the base theme.
+    if (!empty($themes[$theme]->base_theme)) {
+      $theme_paths[$theme] = conditional_styles_paths_to_basetheme($themes[$theme]->base_theme);
+    }
+    $theme_paths[$theme][$theme] = dirname($themes[$theme]->filename);
+  }
+  
+  return $theme_paths[$theme];
+}
+
+/**
+ * When the theme registry is rebuilt, we also build the cssdry stylesheets.
+ */
+function cssdry_theme($existing, $type, $theme, $path) {  
+  require_once './' . drupal_get_path('module', 'cssdry') . '/cssdry.theme.inc';
+  return _cssdry_theme($existing, $type, $theme, $path);
+}
+
+/**
+ * Implements MODULE_preprocess_page().
+ */
+function cssdry_preprocess_page(&$vars, $hook) {
+  // Append them to $styles and add a $cssdry_styles variable.
+  $vars['styles'] .= $vars['cssdry_styles'] = variable_get('cssdry_' . $GLOBALS['theme'], '');
 }
