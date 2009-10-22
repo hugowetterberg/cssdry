@@ -88,7 +88,7 @@ class CSSProcessor {
 
       $cssText = $imported;
       $imported = preg_replace_callback(
-        '#@import +url\("([^"]+\.css)\"\);?#',
+        '#@import +url\("([^"]+)\"\);?#',
         array($this, 'importCallback'),
         $cssText);
     } while ($imported != $cssText && $import_depth < 10);
