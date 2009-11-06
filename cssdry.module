@@ -6,78 +6,54 @@
  *
  * @param $path
  *    Path to the css file to dry up.
- * @param $basepath
- *    Path from which imports will be relative to.
  * @return 
  *    new path to the dried out version of the provided css, or null if the source css file was not found.
  */
 function cssdry_stylesheet($path) {
   require_once('cssdry.inc');
 
-  if (empty($basepath)) {
-    $basepath = dirname($path);
-  }
-
-  if (file_exists($path)) {
-    $dir = file_directory_path() . '/cssdry';
-    $dry_file = $dir . '/' . md5(realpath($path)) . '.css';
-    if (!file_exists($dry_file) || filemtime($dry_file) < filemtime($path)) {
-      if (!file_exists($dir)) {
-        mkdir($dir);
-      }
+  if (file_exists($path)) {    
+    $dry_file = 'cssdry-'.md5(realpath($path)) . '.css';
+    $dry_path = file_directory_path() . '/css/' . $dry_file;
+        
+    if (!file_exists($dry_path) || filemtime($dry_path) < filemtime($path)) {
+      unlink($dry_path);
+      
       $contents = file_get_contents($path);
-      file_put_contents($dry_file, _cssdry($contents, dirname($path)));
+        
+      $types['all'][$path] = true;
+      
+      $compressed_file = drupal_build_css_cache($types,  $dry_file);            
+      $compressed_content = file_get_contents($compressed_file);      
+      file_put_contents($compressed_file, _cssdry($compressed_content, null));  
     }
-    return $dry_file;
+    
+    return $dry_path;
   }
 }
 
 
 /**
- * Implements hook_preprocess_page().
+ * Implements hook_init()
  */
-function cssdry_preprocess_page(&$vars, $hook) {	
-  global $language, $theme;
-  
-  require_once('cssdry.inc');
+function cssdry_init() {
+  global $conf;
 
+  // TODO: Figure out how to determine the current theme, not the default one.
+  //       at this point however at this point the in request processing, the theme isn't known.
+  $theme_default = $conf['theme_default'];
+  
   // Grab all the cssdry stylesheets.
-  $stylesheets = _cssdry_fetch_theme_stylesheets($theme);
-  if (empty($stylesheets)) {
+  $stylesheets = _cssdry_fetch_theme_stylesheets($theme_default);  
+  if (empty($stylesheets)) {    
     return;
   }
-
-  // Render the stylesheets to link elements.
-  $cssdry_styles = '';
-
-  $query_string = '?'. substr(variable_get('css_js_query_string', '0'), 1, 1);
-  $base_path = base_path();
-  $output = '';
   
-  $types = array();
-  
-  $timestamp_string = '';
-  // Create the $types array for use by drupal_build_css_cache and build an ID representing the current stylesheets state.
-  foreach ($stylesheets AS $media => $files) {
-  	$types[$media] = array();  	
+  foreach ($stylesheets AS $media => $files) {      	  	
     foreach ($files AS $file => $path) {
-      $types[$media][$path.'/'.$file] = true;
-      $timestamp_string .= filemtime($path);
+      drupal_add_css(cssdry_stylesheet($path.'/'.$file, 'theme', $media));      
     }
   }
-  
-  $compressed_file = file_create_path('css').'/dry-'.md5($timestamp_string).".css";
-  if (!file_exists($compressed_file)) {
-  	$compressed_file = drupal_build_css_cache($types,  'dry-'.md5($timestamp_string).".css");  
-  	$compressed_content = file_get_contents($compressed_file);
-  	file_put_contents($compressed_file, _cssdry($compressed_content, null));
-  }
-  
-  $cssdry_links .= "<link type=\"text/css\" rel=\"stylesheet\" media=\"$media\" href=\"$base_path$compressed_file$query_string\" />\n";
-      
-  
-  // Append them to $styles and add a $cssdry_styles variable.
-  $vars['styles'] .= $vars['cssdry_styles'] = $cssdry_links;
 }
 
 /**
