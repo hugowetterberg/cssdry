@@ -110,3 +110,23 @@ function _cssdry_paths_to_basetheme($theme) {
 
   return $theme_paths[$theme];
 }
+
+/**
+ * Implementation of hook_flush_caches().
+ * Fugly way of removing css cache-files
+ *
+ * @return array
+ *   An empty array to satisfy Drupal
+ */
+function cssdry_flush_caches() {
+  $dir = realpath(file_directory_path() . '/cssdry');
+  $dh = new DirectoryIterator($dir);
+  foreach ($dh as $file) {
+    if (!$file->isDot()) {
+      file_delete($file->getPathname());
+    }
+  }
+
+  // Drupal expects an array, so I guess we should do this
+  return array();
+}
