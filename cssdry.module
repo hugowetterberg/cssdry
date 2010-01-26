@@ -6,28 +6,27 @@
  *
  * @param $path
  *    Path to the css file to dry up.
- * @return 
+ * @return
  *    new path to the dried out version of the provided css, or null if the source css file was not found.
  */
 function cssdry_stylesheet($path) {
   require_once('cssdry.inc');
 
-  if (file_exists($path)) {    
+  if (file_exists($path)) {
     $dry_file = 'cssdry-'.md5(realpath($path)) . '.css';
     $dry_path = file_directory_path() . '/css/' . $dry_file;
-        
     if (!file_exists($dry_path) || filemtime($dry_path) < filemtime($path)) {
-      unlink($dry_path);
-      
+      file_delete($dry_path);
+
       $contents = file_get_contents($path);
-        
+
       $types['all'][$path] = true;
-      
-      $compressed_file = drupal_build_css_cache($types,  $dry_file);            
-      $compressed_content = file_get_contents($compressed_file);      
-      file_put_contents($compressed_file, _cssdry($compressed_content, null));  
+
+      $compressed_file = drupal_build_css_cache($types,  $dry_file);
+      $compressed_content = file_get_contents($compressed_file);
+      file_put_contents($compressed_file, _cssdry($compressed_content, null));
     }
-    
+
     return $dry_path;
   }
 }
@@ -42,16 +41,16 @@ function cssdry_init() {
   // TODO: Figure out how to determine the current theme, not the default one.
   //       at this point however at this point the in request processing, the theme isn't known.
   $theme_default = $conf['theme_default'];
-  
+
   // Grab all the cssdry stylesheets.
-  $stylesheets = _cssdry_fetch_theme_stylesheets($theme_default);  
-  if (empty($stylesheets)) {    
+  $stylesheets = _cssdry_fetch_theme_stylesheets($theme_default);
+  if (empty($stylesheets)) {
     return;
   }
-  
-  foreach ($stylesheets AS $media => $files) {      	  	
+
+  foreach ($stylesheets AS $media => $files) {
     foreach ($files AS $file => $path) {
-      drupal_add_css(cssdry_stylesheet($path.'/'.$file, 'theme', $media));      
+      drupal_add_css(cssdry_stylesheet($path.'/'.$file, 'theme', $media));
     }
   }
 }
@@ -62,7 +61,7 @@ function cssdry_init() {
  * @param $name
  *    The name of the theme.
  * @return
- *    An associative array mapping media types to an array of appropriate css files. 
+ *    An associative array mapping media types to an array of appropriate css files.
  */
 function _cssdry_fetch_theme_stylesheets($name) {
   $paths = _cssdry_paths_to_basetheme($name);
@@ -113,16 +112,18 @@ function _cssdry_paths_to_basetheme($theme) {
 
 /**
  * Implementation of hook_flush_caches().
- * Fugly way of removing css cache-files
+ * Removing css dry file when clearing cache
+ * to force creation of a new one.
  *
  * @return array
  *   An empty array to satisfy Drupal
  */
 function cssdry_flush_caches() {
-  $dir = realpath(file_directory_path() . '/cssdry');
+  $dir = realpath(file_directory_path() . '/css');
   $dh = new DirectoryIterator($dir);
   foreach ($dh as $file) {
     if (!$file->isDot()) {
+      die('hej');
       file_delete($file->getPathname());
     }
   }
