@@ -123,7 +123,6 @@ function cssdry_flush_caches() {
   $dh = new DirectoryIterator($dir);
   foreach ($dh as $file) {
     if (!$file->isDot()) {
-      die('hej');
       file_delete($file->getPathname());
     }
   }
