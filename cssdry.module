@@ -120,10 +120,12 @@ function _cssdry_paths_to_basetheme($theme) {
  */
 function cssdry_flush_caches() {
   $dir = realpath(file_directory_path() . '/css');
-  $dh = new DirectoryIterator($dir);
-  foreach ($dh as $file) {
-    if (!$file->isDot()) {
-      file_delete($file->getPathname());
+  if ($dir) {
+    $dh = new DirectoryIterator($dir);
+    foreach ($dh as $file) {
+      if (!$file->isDot()) {
+        file_delete($file->getPathname());
+      }
     }
   }
 
