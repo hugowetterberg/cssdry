@@ -119,6 +119,10 @@ function _cssdry_paths_to_basetheme($theme) {
  *   An empty array to satisfy Drupal
  */
 function cssdry_flush_caches() {
+  if (!variable_get('cssdry_cache_clear_deletes_files', TRUE)) {
+    return;
+  }
+
   $dir = realpath(file_directory_path() . '/css');
   if ($dir) {
     $dh = new DirectoryIterator($dir);
