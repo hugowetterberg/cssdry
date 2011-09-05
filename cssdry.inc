@@ -37,12 +37,12 @@ class CSSProcessor {
 
   private function expandConstants() {
     $css = preg_replace_callback(
-      '/\$([a-z_\-0-9]+)+=([^;]+);?/',
+      '/\$([a-z_-]+)+=([^;]+);?/',
       array($this, 'extractConstantsCallback'),
       $this->content);
 
     $css = preg_replace_callback(
-      '/\$([a-z_\-0-9]+)/',
+      '/\$([a-z_-]+)/',
       array($this, 'substituteConstantsCallback'),
       $css);
 
