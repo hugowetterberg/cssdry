@@ -24,7 +24,7 @@ function cssdry_stylesheet($path) {
 
       $compressed_file = drupal_build_css_cache($types,  $dry_file);
       $compressed_content = file_get_contents($compressed_file);
-      file_put_contents($dry_path, _cssdry($compressed_content, null));
+      file_put_contents($compressed_file, _cssdry($compressed_content, null));
     }
 
     return $dry_path;
